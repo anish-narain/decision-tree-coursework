@@ -2,21 +2,22 @@ import numpy as np
 import os
 import matplotlib
 import math
+from numpy.random import default_rng
 
-def read_dataset(filepath):
-    x = []
-    y_labels = []
-    for line in open(filepath):
-        if line.strip(): 
-            row = line.strip().split("\t")
-            x.append(list(map(float, row[:-1])))
-            y_labels.append(row[-1])
+# def read_dataset(filepath):
+#     x = []
+#     y_labels = []
+#     for line in open(filepath):
+#         if line.strip(): 
+#             row = line.strip().split("\t")
+#             x.append(list(map(float, row[:-1])))
+#             y_labels.append(row[-1])
 
-    [classes, y] = np.unique(y_labels, return_inverse=True)
+#     [classes, y] = np.unique(y_labels, return_inverse=True)
 
-    x = np.array(x)
-    y = np.array(y)
-    return (x, y, classes) #return dataset
+#     x = np.array(x)
+#     y = np.array(y)
+#     return (x, y, classes) #return dataset
 
 """
 Task 1
@@ -25,6 +26,16 @@ Task 1
 #print(y, "\n")
 #print(classes, "\n")
 """
+
+def split_training_testing_data(data_set, test_proportion, random_generator=default_rng()):
+    instances, _ = data_set.shape
+    test_size = round(test_proportion * instances)
+    shuffled_indices = random_generator.permutation(instances)
+    
+    test = data_set[shuffled_indices[:test_size]]
+    train = data_set[shuffled_indices[test_size:]]
+
+    return tuple(map(np.array, (test, train)))
 
 class Node:
     def __init__(self, attribute, value):
@@ -43,6 +54,16 @@ class DecisionTree:
             if node.left is not None or node.right is not None:
                 self.visualize_tree(node.left, level + 1, "L--- ")
                 self.visualize_tree(node.right, level + 1, "R--- ")
+    
+    def make_prediction(self, node, testing_instance):
+        current_node = node
+        while current_node.attribute != "Leaf":
+            attribute_value = testing_instance[current_node.attribute]
+            if attribute_value < current_node.value:
+                current_node = current_node.left
+            else:
+                current_node = current_node.right
+        return current_node.value
 
         
 
@@ -119,9 +140,12 @@ def decision_tree_learning(training_dataset, depth):
 
 def main():
     dataset = np.loadtxt("wifi_db/clean_dataset.txt")
-    print(dataset)
+    seed = 60012
+    rg = default_rng(seed)
+    testing_dataset, training_dataset = split_training_testing_data(dataset, 0.2, rg)
+ 
     # Call the decision_tree_learning function to build the decision tree
-    tree, depth = decision_tree_learning(dataset, depth=0)
+    tree, depth = decision_tree_learning(training_dataset, depth=0)
 
     # You can now traverse the tree and make predictions or explore its structure
     # For example, let's traverse the leftmost branch until a leaf is reached:
@@ -129,7 +153,10 @@ def main():
    
     new_tree = DecisionTree(current_node.attribute,current_node.value)
     print(new_tree.visualize_tree(current_node))
-    
+    for instance in testing_dataset:
+        predicted_value = new_tree.make_prediction(current_node, instance)
+        print(predicted_value, instance[-1])
+
     # Print the final leaf node
     print(f"Leaf Node Value: {current_node.value}")
 
