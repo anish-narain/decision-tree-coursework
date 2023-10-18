@@ -69,14 +69,21 @@ def decision_tree_learning(training_dataset, depth):
         return Node("Leaf", 0.0000), depth
     else:
         split_attribute, split_value = find_split(training_dataset)
-        tree_pointer = Node(split_attribute, split_value)
-        left_dataset, right_dataset = split_dataset(training_dataset, split_attribute, split_value)
         
+        if split_value == 0.0:
+            # If the split value is 0, create a leaf node with the majority class
+            elements, count = np.unique(training_dataset[:, -1], return_counts=True)
+            majority_class = elements[np.argmax(count)]
+            return Node("Leaf", majority_class), depth
+
+        tree_pointer = Node(split_attribute, split_value)
+
+        left_dataset, right_dataset = split_dataset(training_dataset, split_attribute, split_value)
         tree_pointer.left, left_depth = decision_tree_learning(left_dataset, depth+1)
         tree_pointer.right, right_depth = decision_tree_learning(right_dataset, depth+1)
+        
         return tree_pointer, max(left_depth, right_depth)
    
-
 
 def main():
     dataset = np.loadtxt("wifi_db/clean_dataset.txt")
@@ -86,9 +93,7 @@ def main():
     # You can now traverse the tree and make predictions or explore its structure
     # For example, let's traverse the leftmost branch until a leaf is reached:
     current_node = tree
-    while current_node.attribute is not None:
-        print(f"Attribute: {current_node.attribute}, Value: {current_node.value}")
-        current_node = current_node.left
+   
 
     # Print the final leaf node
     print(f"Leaf Node Value: {current_node.value}")
