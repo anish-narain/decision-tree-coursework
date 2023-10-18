@@ -44,7 +44,6 @@ class Node:
         self.left = None
         self.right = None
 
-
 class DecisionTree:
     def __init__(self, root_attribute, root_value):
         self.root = Node(root_attribute, root_value)
@@ -57,32 +56,34 @@ class DecisionTree:
                 self.visualize_tree(node.right, level + 1, "R--- ")
 
     def plot_tree(self, node, level=0, x=0, x_scale=1.0, y_scale=1.0):
-        # Create a single plot outside of the recursive function
-        fig, ax = plt.subplots(figsize=(12, 8))  # Adjust the figure size as needed
-        
+        font_properties = {
+            'family': 'serif',
+            'color': 'white',
+            'weight': 'normal',
+        }
+        fig, ax = plt.subplots(figsize=(12, 8))
+        fig.patch.set_facecolor('black')
+
         def recursive_plot(node, level, x, x_scale, y_scale):
             if node is not None:
                 # Draw the current node with styling
                 node_text = f"{node.attribute} < {node.value}"
-                ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='lightgray', edgecolor='black', boxstyle='round,pad=0.2'))
+                ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.2'), fontdict=font_properties)
                 
                 # Recursively plot left and right subtrees
                 if node.left is not None:
                     x_left = x - 1.0 / (2 ** level) * x_scale
-                    plt.plot([x, x_left], [-level * y_scale, -level * y_scale - 1], 'ro-', linewidth=2, markersize=8)  # Draw a red line to left child
+                    plt.plot([x, x_left], [-level * y_scale, -level * y_scale - 1], 'ro-', linewidth=2, markersize=8)
                     recursive_plot(node.left, level + 1, x_left, x_scale, y_scale)
                 if node.right is not None:
                     x_right = x + 1.0 / (2 ** level) * x_scale
-                    plt.plot([x, x_right], [-level * y_scale, -level * y_scale - 1], 'bo-', linewidth=2, markersize=8)  # Draw a blue line to right child
+                    plt.plot([x, x_right], [-level * y_scale, -level * y_scale - 1], 'bo-', linewidth=2, markersize=8)
                     recursive_plot(node.right, level + 1, x_right, x_scale, y_scale)
         
         recursive_plot(node, level, x, x_scale, y_scale)
         
-        # Turn off the axis and set the plot title
         ax.axis('off')
-        plt.title('Decision Tree Visualization', fontsize=16)
-        
-        # Display the plot
+        plt.title('Decision Tree Visualization', fontsize=16, fontdict=font_properties)
         plt.show()
     
     def make_prediction(self, node, testing_instance):
@@ -95,9 +96,6 @@ class DecisionTree:
                 current_node = current_node.right
         return current_node.value
     
-
-        
-
 def find_split(dataset):
     max_info_gain, feature, split = 0, 0, 0
     num_instances, num_features = dataset.shape
@@ -180,20 +178,18 @@ def main():
     # Call the decision_tree_learning function to build the decision tree
     tree, depth = decision_tree_learning(training_dataset, depth=0)
 
-    # You can now traverse the tree and make predictions or explore its structure
-    # For example, let's traverse the leftmost branch until a leaf is reached:
     current_node = tree
    
     new_tree = DecisionTree(current_node.attribute,current_node.value)
     print(new_tree.visualize_tree(current_node))
-    print(new_tree.plot_tree(current_node))
+    new_tree.plot_tree(current_node)
+
     for instance in testing_dataset:
         predicted_value = new_tree.make_prediction(current_node, instance)
         print(predicted_value, instance[-1])
-
-
+    
     # Print the final leaf node
-    #print(f"Leaf Node Value: {current_node.value}")
+    print(f"Leaf Node Value: {current_node.value}")
 
 
 if __name__ == "__main__":
