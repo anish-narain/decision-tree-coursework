@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import matplotlib
+import math
 
 def read_dataset(filepath):
     x = []
@@ -24,6 +25,7 @@ Task 1
 #print(y, "\n")
 #print(classes, "\n")
 """
+
 class Node:
     def __init__(self, attribute, value):
         self.attribute = attribute
@@ -42,8 +44,38 @@ class DecisionTree:
                 self.visualize_tree(node.left, level + 1, "L--- ")
                 self.visualize_tree(node.right, level + 1, "R--- ")
 
+        
+
 def find_split(dataset):
-    ...
+    max_info_gain, feature, split = 0, 0, 0
+    num_instances, num_features = dataset.shape
+    for f in range(num_features - 1):
+        sorted_indices = np.argsort(dataset[:, f])
+        sorted_dataset = dataset[sorted_indices]
+        for instance in range(num_instances-1):
+            if sorted_dataset[instance][f] != sorted_dataset[instance+1][f]:
+                s_left = sorted_dataset[:instance+1]
+                s_right = sorted_dataset[instance+1:]
+                gain = calculate_information_gain(sorted_dataset, s_left, s_right)
+                if gain > max_info_gain:
+                    max_info_gain = gain
+                    feature = f
+                    split = sorted_dataset[instance+1][f]
+    print(feature, split, '\n')
+    return feature, split
+
+
+def calculate_entropy(data_set):
+    _, counts = np.unique(data_set[:, -1], return_counts=True)
+    total = sum(counts)
+    entropy = sum((-1) * math.log2(count / total) * (count / total) for count in counts)
+    return entropy
+
+
+def calculate_information_gain(s_all, s_left, s_right):
+    remainder = (len(s_left) * calculate_entropy(s_left) / len(s_all))  + (len(s_right) * calculate_entropy(s_right)/ len(s_all))
+    info_gain = calculate_entropy(s_all) - remainder
+    return info_gain
 
 def split_dataset(training_dataset, split_attribute, split_value):
     # Extract the attribute column
@@ -87,6 +119,7 @@ def decision_tree_learning(training_dataset, depth):
 
 def main():
     dataset = np.loadtxt("wifi_db/clean_dataset.txt")
+    print(dataset)
     # Call the decision_tree_learning function to build the decision tree
     tree, depth = decision_tree_learning(dataset, depth=0)
 
@@ -94,7 +127,9 @@ def main():
     # For example, let's traverse the leftmost branch until a leaf is reached:
     current_node = tree
    
-
+    new_tree = DecisionTree(current_node.attribute,current_node.value)
+    print(new_tree.visualize_tree(current_node))
+    
     # Print the final leaf node
     print(f"Leaf Node Value: {current_node.value}")
 
