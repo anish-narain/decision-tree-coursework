@@ -18,11 +18,16 @@ $ source venv/bin/activate
 Functions for running the most important instructions are shown below. Please review the individual comments in the source code for more information.
 
 ### Decsion Tree and Visualization
+n
 
 ### Split Function
+n
 
 ### Cross Validation
+n
 
 ### Evaluation Metrics 
+n
 
 ## Results 
+n
