@@ -18,7 +18,20 @@ $ source venv/bin/activate
 Functions for running the most important instructions are shown below. Please review the individual comments in the source code for more information.
 
 ### Decsion Tree and Visualization
-n
+
+Thw code defines two classes, Node and DecisionTree, to define and build the decsion tree and provides methods for visualizing decision trees. The Node class represents a node in a decision tree, storing information about the emitter, value, room, and child nodes. The DecisionTree class initializes with a root node and offers two visualization methods. The visualize_tree method displays the structure of the decision tree, highlighting leaf nodes and decision rules, and the plot_tree method generates a visual representation of the tree using matplotlib. The class definition is shown below:
+```
+class Node:
+    def __init__(self, emitter, value):
+        self.emitter = emitter
+        self.value = value
+        self.room = None
+        self.left = None
+        self.right = None
+```
+Additionally, in order to build the tree the code contains two functions, reached_leaf and decision_tree_learning, which are essential components of a decision tree learning algorithm. The reached_leaf function checks if the current node in the decision tree is a leaf node by comparing the labels of instances in the training dataset. If all labels are the same, it returns True, indicating that a leaf node has been reached.
+
+The decision_tree_learning function is used to construct a decision tree recursively. It first checks if the current node is a leaf node using the reached_leaf function. If it is a leaf node, it creates a leaf node with a label. If not, it finds the best emitter and split value for the current node using the find_split function. If the split value is 0, it creates a leaf node with the majority class label. Otherwise, it constructs the left and right child nodes by recursively calling decision_tree_learning and continues to build the decision tree. The function returns the root node of the decision tree and its depth. In summary, this code represents the core logic for building a decision tree based on a training dataset and is a fundamental part of decision tree construction algorithms.
 
 ### Split Function
 n
