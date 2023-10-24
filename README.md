@@ -2,7 +2,7 @@
 ## Project Setup
 To set up our project environment and libaries we used the following commands, having downloaded the requirements.txt file:
 
-$ cd your_project_directory
+$ cd your_project_directory 
 $ python3 -m venv venv
 $ source venv/bin/activate
 (venv) $ pip install --upgrade pip
