@@ -44,5 +44,11 @@ The script defines a series of functions for evaluating the performance of class
 
 ![Alt Text](https://raw.githubusercontent.com/KennyMiyasato/classification_report_precision_recall_f1-score_blog_post/b059ac3f2ac16780d4deb2405060513b7cd2813c/images/precision_formula.svg)
 
+![Alt Text](https://raw.githubusercontent.com/KennyMiyasato/classification_report_precision_recall_f1-score_blog_post/b059ac3f2ac16780d4deb2405060513b7cd2813c/images/accuracy_formula.svg)
+
+![Alt Text](https://github.com/KennyMiyasato/classification_report_precision_recall_f1-score_blog_post/raw/master/images/f1-score_formula.svg)
+
+![Alt Text](https://github.com/KennyMiyasato/classification_report_precision_recall_f1-score_blog_post/raw/master/images/recall_formula.svg)
+
 ## Results 
 n
