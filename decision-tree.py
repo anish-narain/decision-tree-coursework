@@ -154,7 +154,6 @@ def split_dataset(training_dataset, split_emitter, split_value):
 def reached_leaf(training_dataset):
     return np.all(training_dataset[:, -1] == training_dataset[:, -1][0])
 
-
 def decision_tree_learning(training_dataset, depth):
     if reached_leaf(training_dataset):
         class_column = training_dataset[:, -1]
@@ -180,8 +179,8 @@ def decision_tree_learning(training_dataset, depth):
         tree_pointer.right, right_depth = decision_tree_learning(right_dataset, depth+1)
         
         return tree_pointer, max(left_depth, right_depth)
-  
-    
+
+
 def confusion_matrix(true_values, predicted_values, num_classes):
     if len(true_values) != len(predicted_values):
         raise ValueError("Input lists must have the same length")
@@ -192,7 +191,7 @@ def confusion_matrix(true_values, predicted_values, num_classes):
     row = true values
     column = predicted values
     '''
-
+    
     for i in range(len(true_values)):
         true_class = int(true_values[i])
         predicted_class = int(predicted_values[i])
@@ -229,7 +228,58 @@ def recall_from_confusion(confusion):
         macro_r = np.mean(r)
     
     return (r, macro_r)
-   
+
+def f1_score_from_confusion(confusion):
+    (precisions, macro_p) = precision_from_confusion(confusion)
+    (recalls, macro_r) = recall_from_confusion(confusion)
+
+    # just to make sure they are of the same length
+    assert len(precisions) == len(recalls)
+
+    f = np.zeros((len(precisions), ))
+    for c, (p, r) in enumerate(zip(precisions, recalls)):
+        if p + r > 0:
+            f[c] = 2 * p * r / (p + r)
+
+    # Compute the macro-averaged F1
+    macro_f = 0.
+    if len(f) > 0:
+        macro_f = np.mean(f)
+    
+    return (f, macro_f)
+
+
+#Could build off of this ===============================================================
+def k_fold_split(n_splits, n_instances, random_generator=default_rng()):
+    # generate a random permutation of indices from 0 to n_instances
+    shuffled_indices = random_generator.permutation(n_instances)
+
+    # split shuffled indices into almost equal sized splits
+    split_indices = np.array_split(shuffled_indices, n_splits)
+
+    return split_indices
+
+
+def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
+    # split the dataset into k splits
+    split_indices = k_fold_split(n_folds, n_instances, random_generator)
+
+    folds = []
+    for k in range(n_folds):
+        # pick k as test, and k+1 as validation (or 0 if k is the final split)
+        test_indices = split_indices[k]
+        val_indices = split_indices[(k+1) % n_folds]
+
+        # concatenate remaining splits for training
+        train_indices = np.zeros((0, ), dtype=np.int)
+        for i in range(n_folds):
+            # concatenate to training set if not validation or test
+            if i not in [k, (k+1) % n_folds]:
+                train_indices = np.hstack([train_indices, split_indices[i]])
+
+        folds.append([train_indices, val_indices, test_indices])
+        
+    return folds
 
 def main():
     dataset = np.loadtxt("wifi_db/clean_dataset.txt")
@@ -244,15 +294,15 @@ def main():
    
     new_tree = DecisionTree(current_node.emitter,current_node.value)
     print(new_tree.visualize_tree(current_node))
-    new_tree.plot_tree(current_node)
+    #new_tree.plot_tree(current_node)
     
     count, total = 0, 0
 
     true_dataset = []
     prediction_dataset = []
+
     for instance in testing_dataset:
         predicted_value = new_tree.make_prediction(current_node, instance)
-        print(instance[-1])
         count += int(predicted_value == instance[-1])
         total += 1
         true_dataset.append(instance[-1])
@@ -262,11 +312,13 @@ def main():
 
     true_dataset1 = [1.0, 3.0, 2.0, 1.0, 4.0]
     prediction_dataset1 = [3.0, 2.0, 3.0, 1.0, 3.0]
-    confusionmatrix = confusion_matrix(true_dataset1,prediction_dataset1, 4)
+
+    confusionmatrix = confusion_matrix(true_dataset,prediction_dataset, 4)
     print(confusionmatrix)
     print(accuracy_from_confusion(confusionmatrix))
     print(precision_from_confusion(confusionmatrix))
     print(recall_from_confusion(confusionmatrix))
+    print(f1_score_from_confusion(confusionmatrix))
     
     # Print the final leaf node
     #print(f"Leaf Node value: {current_node.value}")
