@@ -38,27 +38,23 @@ def split_training_testing_data(data_set, test_proportion, random_generator=defa
     return tuple(map(np.array, (test, train)))
 
 class Node:
-    def __init__(self, index, value):
-        self.index = index
+    def __init__(self, emitter, value):
+        self.emitter = emitter
         self.value = value
+        self.room = None
         self.left = None
         self.right = None
 
-"""
-node.index = contains emitter value when you are not at a leaf and room value when you are at a leaf
-node.value = wifi signal
-"""
-
 class DecisionTree:
-    def __init__(self, root_index, root_value):
-        self.root = Node(root_index, root_value)
+    def __init__(self, root_emitter, root_value):
+        self.root = Node(root_emitter, root_value)
     
     def visualize_tree(self, node, level=0, prefix="Root: "):
         if node is not None:
             if node.left is None and node.right is None:
-                print(" " * (level * 4), prefix, "leaf:", str(node.index))
+                print(" " * (level * 4), prefix, "leaf:", str(node.room))
             else:
-                print(" " * (level * 4), prefix, ("[X" + str(node.index)), " < ", (str(node.value)+"]"))
+                print(" " * (level * 4), prefix, ("[X" + str(node.emitter)), " < ", (str(node.value)+"]"))
             
             if node.left is not None or node.right is not None:
                 self.visualize_tree(node.left, level + 1, "L--- ")
@@ -77,11 +73,11 @@ class DecisionTree:
             if node is not None:
                 if node.left is None and node.right is None:
                     # This is a leaf node
-                    node_text = f"leaf:{node.index}"
+                    node_text = f"leaf:{node.room}"
                     ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.2'), fontdict=font_properties)
                 else:
                     # This is not a leaf node
-                    node_text = f"X{node.index} < {node.value}"
+                    node_text = f"X{node.emitter} < {node.value}"
                     ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.2'), fontdict=font_properties)
                 
                 
@@ -103,15 +99,13 @@ class DecisionTree:
     
     def make_prediction(self, node, testing_instance):
         current_node = node
-        count = 0
         while (current_node.left or current_node.right):
-            index_value = testing_instance[current_node.index]
-            if index_value < current_node.value:
+            emitter_value = testing_instance[current_node.emitter]
+            if emitter_value < current_node.value:
                 current_node = current_node.left
             else:
                 current_node = current_node.right
-            count += 1
-        return current_node.index
+        return current_node.room
     
 def find_split(dataset):
     max_info_gain, feature, split = 0, 0, 0
@@ -143,15 +137,15 @@ def calculate_information_gain(s_all, s_left, s_right):
     info_gain = calculate_entropy(s_all) - remainder
     return info_gain
 
-def split_dataset(training_dataset, split_index, split_value):
-    # Extract the index column
-    index_column = training_dataset[:, split_index]
+def split_dataset(training_dataset, split_emitter, split_value):
+    # Extract the emitter column
+    emitter_column = training_dataset[:, split_emitter]
 
     # Create boolean masks for the left and right datasets
-    left_mask = index_column < split_value
-    right_mask = index_column >= split_value
+    left_mask = emitter_column < split_value
+    right_mask = emitter_column >= split_value
 
-    # Use boolean indexing to create the left and right datasets
+    # Use boolean emittering to create the left and right datasets
     left_dataset = training_dataset[left_mask]
     right_dataset = training_dataset[right_mask]
 
@@ -165,19 +159,23 @@ def decision_tree_learning(training_dataset, depth):
     if reached_leaf(training_dataset):
         class_column = training_dataset[:, -1]
         leaf_label = class_column[0]
-        return Node(leaf_label, 0.000), depth
+        leaf_node = Node("leaf", 0.000)
+        leaf_node.room = leaf_label
+        return leaf_node, depth
     else:
-        split_index, split_value = find_split(training_dataset)
+        split_emitter, split_value = find_split(training_dataset)
         
         if split_value == 0.0:
             # If the split value is 0, create a leaf node with the majority class
             elements, count = np.unique(training_dataset[:, -1], return_counts=True)
             majority_class = elements[np.argmax(count)]
-            return Node(majority_class, 0.000), depth
+            leaf_node = Node("leaf", 0.000)
+            leaf_node.room = majority_class
+            return leaf_node, depth
 
-        tree_pointer = Node(split_index, split_value)
+        tree_pointer = Node(split_emitter, split_value)
 
-        left_dataset, right_dataset = split_dataset(training_dataset, split_index, split_value)
+        left_dataset, right_dataset = split_dataset(training_dataset, split_emitter, split_value)
         tree_pointer.left, left_depth = decision_tree_learning(left_dataset, depth+1)
         tree_pointer.right, right_depth = decision_tree_learning(right_dataset, depth+1)
         
@@ -234,7 +232,7 @@ def recall_from_confusion(confusion):
    
 
 def main():
-    dataset = np.loadtxt("wifi_db/noisy_dataset.txt")
+    dataset = np.loadtxt("wifi_db/clean_dataset.txt")
     seed = 60012
     rg = default_rng(seed)
     testing_dataset, training_dataset = split_training_testing_data(dataset, 0.2, rg)
@@ -244,9 +242,9 @@ def main():
 
     current_node = tree
    
-    new_tree = DecisionTree(current_node.index,current_node.value)
+    new_tree = DecisionTree(current_node.emitter,current_node.value)
     print(new_tree.visualize_tree(current_node))
-    #new_tree.plot_tree(current_node)
+    new_tree.plot_tree(current_node)
     
     count, total = 0, 0
 
@@ -260,8 +258,8 @@ def main():
         true_dataset.append(instance[-1])
         prediction_dataset.append(predicted_value)
         
+    print("Accuracy: ", count / total)
 
-    #print("Accuracy: ", count / total)
     true_dataset1 = [1.0, 3.0, 2.0, 1.0, 4.0]
     prediction_dataset1 = [3.0, 2.0, 3.0, 1.0, 3.0]
     confusionmatrix = confusion_matrix(true_dataset1,prediction_dataset1, 4)
