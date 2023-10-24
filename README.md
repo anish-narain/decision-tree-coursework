@@ -42,8 +42,7 @@ n
 ### Evaluation Metrics 
 The script defines a series of functions for evaluating the performance of classification models using metrics like a confusion matrix, accuracy, precision, recall, and F1-score. The `confusion_matrix` function calculates the confusion matrix based on the true class labels and predicted class labels, where the row defines the true value and the column is the predicted. The `accuracy_from_confusion` function computes the classification accuracy, while `precision_from_confusion` and `recall_from_confusion` calculate precision and recall values for each class and their macro-averaged values. Finally, the `f1_score_from_confusion` function computes the F1-score for each class and its macro-averaged value. These functions are essential for assessing the quality and effectiveness of classification models, making them a valuable tool for machine learning and classification tasks. Below are the formulae used to compute the metrics described:
 
-![alt text](![image](https://github.com/anish-narain/decision-tree-coursework/assets/115703122/69f8a5d2-0f46-4711-8748-9742f659a12b)
-)
+![Alt Text](https://raw.githubusercontent.com/KennyMiyasato/classification_report_precision_recall_f1-score_blog_post/b059ac3f2ac16780d4deb2405060513b7cd2813c/images/precision_formula.svg)
 
 ## Results 
 n
