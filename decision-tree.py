@@ -63,22 +63,22 @@ class DecisionTree:
     def plot_tree(self, node, level=0, x=0, x_scale=1.0, y_scale=1.0):
         font_properties = {
             'family': 'serif',
-            'color': 'white',
+            'color': 'black',
             'weight': 'normal',
         }
-        fig, ax = plt.subplots(figsize=(12, 8))
-        fig.patch.set_facecolor('black')
+        fig, ax = plt.subplots(figsize=(20, 10))
+        fig.patch.set_facecolor('white')
 
         def recursive_plot(node, level, x, x_scale, y_scale):
             if node is not None:
                 if node.left is None and node.right is None:
                     # This is a leaf node
                     node_text = f"leaf:{node.room}"
-                    ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.2'), fontdict=font_properties)
+                    ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'), fontdict=font_properties)
                 else:
                     # This is not a leaf node
                     node_text = f"X{node.emitter} < {node.value}"
-                    ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='black', edgecolor='white', boxstyle='round,pad=0.2'), fontdict=font_properties)
+                    ax.text(x, -level * y_scale, node_text, ha='center', va='center', bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.2'), fontdict=font_properties)
                 
                 
                 # Recursively plot left and right subtrees
@@ -94,7 +94,7 @@ class DecisionTree:
         recursive_plot(node, level, x, x_scale, y_scale)
         
         ax.axis('off')
-        plt.title('Decision Tree Visualization', fontsize=16, fontdict=font_properties)
+        #plt.title('Decision Tree Visualization', fontsize=16, fontdict=font_properties)
         plt.show()
     
     def make_prediction(self, node, testing_instance):
@@ -294,7 +294,7 @@ def main():
    
     new_tree = DecisionTree(current_node.emitter,current_node.value)
     print(new_tree.visualize_tree(current_node))
-    #new_tree.plot_tree(current_node)
+    new_tree.plot_tree(current_node)
     
     count, total = 0, 0
 
