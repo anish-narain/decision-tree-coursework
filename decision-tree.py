@@ -212,7 +212,7 @@ def precision_from_confusion(confusion):
     p = np.zeros((len(confusion), ))
     for c in range(confusion.shape[0]):
         if np.sum(confusion[:, c]) > 0:
-            p[c] = confusion[c, c] / np.sum(confusion[:, c])
+            p[c] = confusion[c, c] / np.sum(confusion[:, c])  
     macro_p = 0.
     if len(p) > 0:
         macro_p = np.mean(p)
