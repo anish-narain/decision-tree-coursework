@@ -95,10 +95,10 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
-def evaluate(test_db, trained_tree):
+def evaluate(test_db, trained_tree, current_node):
     total_examples, correct_examples = 0, 0
     for test_instance in test_db:
-        correct_examples += int(trained_tree.make_prediction(trained_tree, test_instance) == test_instance[-1])
+        correct_examples += int(trained_tree.make_prediction(current_node, test_instance) == test_instance[-1])
         total_examples += 1
     accuracy = correct_examples / total_examples
     return accuracy
@@ -114,7 +114,7 @@ def cross_validation(database, random_generator=default_rng()):
         database_test = database[test_indices, :]
         current_node, depth = decision_tree_learning(database_train, depth=0)
         trained_tree = DecisionTree(current_node.emitter,current_node.value)
-        err_sum += evaluate(database_test, trained_tree)
+        err_sum += evaluate(database_test, trained_tree, current_node)
     global_err_est = err_sum / n_folds
     return global_err_est
   

@@ -45,7 +45,6 @@ def main():
     # Tests.test_tree_plot(dataset, rg)
     # Tests.test_confusion_matrix(dataset)
     Tests.test_cross_validation(dataset, rg)
-    Tests.testing_tests(dataset)
     
     
 
