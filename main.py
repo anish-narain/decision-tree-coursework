@@ -31,7 +31,6 @@ class Tests:
         print(f1_score_from_confusion(confusionmatrix))
 
     def test_cross_validation(dataset, rg):
-        print("hello new test")
         print(cross_validation(dataset, rg))
 
 

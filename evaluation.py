@@ -1,3 +1,5 @@
+import numpy
+
 from decision_tree import *
 
 def confusion_matrix(true_values, predicted_values, num_classes):
@@ -106,8 +108,10 @@ def evaluate(test_db, trained_tree, current_node):
 def cross_validation(database, random_generator=default_rng()):
     n_folds = 10
     train_test_folds =train_test_k_fold(n_folds, len(database), random_generator)
-    
+
     err_sum = 0
+    acc, prec, rec, f1 = 0, 0, 0, 0
+    confusion_mat = numpy.empty((4, 4))
     for (train_indices, test_indices) in train_test_folds:
         # get the dataset from the correct splits
         database_train = database[train_indices, :]
@@ -115,8 +119,19 @@ def cross_validation(database, random_generator=default_rng()):
         current_node, depth = decision_tree_learning(database_train, depth=0)
         trained_tree = DecisionTree(current_node.emitter,current_node.value)
         err_sum += evaluate(database_test, trained_tree, current_node)
-    global_err_est = err_sum / n_folds
-    return global_err_est
+
+        predicted_values, true_values = [], []
+        for test in database_test:
+            predicted_values.append(trained_tree.make_prediction(current_node, test))
+            true_values.append(test[-1])
+            confusion = confusion_matrix(true_values, predicted_values, 4)
+            confusion_mat += confusion
+            acc += accuracy_from_confusion(confusion)
+            prec += precision_from_confusion(confusion)[0]
+            rec += recall_from_confusion(confusion)[0]
+            f1 += f1_score_from_confusion(confusion)[0]
+
+    return acc / n_folds, prec / n_folds, rec / n_folds, f1 / n_folds, confusion_mat / n_folds, err_sum / n_folds
   
 
 
