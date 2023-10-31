@@ -100,7 +100,7 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 def evaluate(test_db, trained_tree, current_node):
     total_examples, correct_examples = 0, 0
     for test_instance in test_db:
-        correct_examples += int(trained_tree.make_prediction(current_node, test_instance) == test_instance[-1])
+        correct_examples += int(trained_tree.make_prediction(test_instance) == test_instance[-1])
         total_examples += 1
     accuracy = correct_examples / total_examples
     return accuracy
@@ -116,13 +116,13 @@ def cross_validation(database, random_generator=default_rng()):
         # get the dataset from the correct splits
         database_train = database[train_indices, :]
         database_test = database[test_indices, :]
-        current_node, depth = decision_tree_learning(database_train, depth=0)
-        trained_tree = DecisionTree(current_node.emitter,current_node.value)
-        err_sum += evaluate(database_test, trained_tree, current_node)
+        trained_tree, depth = decision_tree_learning(database_train, depth=0)
 
-        predicted_values, true_values = [], []
+        err_sum += evaluate(database_test, trained_tree)
+
         for test in database_test:
-            predicted_values.append(trained_tree.make_prediction(current_node, test))
+            predicted_values, true_values = [], []
+            predicted_values.append(trained_tree.make_prediction(test))
             true_values.append(test[-1])
             confusion = confusion_matrix(true_values, predicted_values, 4)
             confusion_mat += confusion

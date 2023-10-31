@@ -37,32 +37,26 @@ def split_training_testing_data(data_set, test_proportion, random_generator=defa
 
     return tuple(map(np.array, (test, train)))
 
-class Node:
+class TreeNode:
     def __init__(self, emitter, value):
         self.emitter = emitter
         self.value = value
         self.room = None
         self.left = None
         self.right = None
-
-class DecisionTree:
-    def __init__(self, root_emitter, root_value):
-        self.root = Node(root_emitter, root_value)
     
     def visualize_tree(self, level=0, prefix="Root: "):
-        node = self.root
-        if node is not None:
-            if node.left is None and node.right is None:
-                print(" " * (level * 4), prefix, "leaf:", str(node.room))
-            else:
-                print(" " * (level * 4), prefix, ("[X" + str(node.emitter)), " < ", (str(node.value)+"]"))
-            
-            if node.left is not None or node.right is not None:
-                self.visualize_tree(node.left, level + 1, "L--- ")
-                self.visualize_tree(node.right, level + 1, "R--- ")
+
+        if self.left is None and self.right is None:
+            print(" " * (level * 4), prefix, "leaf:", str(self.room))
+        else:
+            print(" " * (level * 4), prefix, ("[X" + str(self.emitter)), " < ", (str(self.value)+"]"))
+
+        if self.left is not None or self.right is not None:
+            self.left.visualize_tree(level + 1, "L--- ")
+            self.right.visualize_tree( level + 1, "R--- ")
 
     def plot_tree(self, level=0, x=0, x_scale=1.0, y_scale=1.0):
-        node = self.root
         font_properties = {
             'family': 'serif',
             'color': 'black',
@@ -93,21 +87,21 @@ class DecisionTree:
                     plt.plot([x, x_right], [-level * y_scale, -level * y_scale - 1], 'bo-', linewidth=2, markersize=8)
                     recursive_plot(node.right, level + 1, x_right, x_scale, y_scale)
         
-        recursive_plot(node, level, x, x_scale, y_scale)
+        recursive_plot(self, level, x, x_scale, y_scale)
         
         ax.axis('off')
         #plt.title('Decision Tree Visualization', fontsize=16, fontdict=font_properties)
         plt.show()
     
     def make_prediction(self, testing_instance):
-        current_node = self.root
+        current_node = self
         while (current_node.left or current_node.right):
-            emitter_value = testing_instance[current_node.emitter]
-            if emitter_value < current_node.value:
-                current_node = current_node.left
+            emitter_value = testing_instance[self.emitter]
+            if emitter_value < self.value:
+                current_node = self.left
             else:
-                current_node = current_node.right
-        return current_node.room
+                current_node = self.right
+        return self.room
     
 def find_split(dataset):
     max_info_gain, feature, split = 0, 0, 0
@@ -160,7 +154,7 @@ def decision_tree_learning(training_dataset, depth):
     if reached_leaf(training_dataset):
         class_column = training_dataset[:, -1]
         leaf_label = class_column[0]
-        leaf_node = Node("leaf", 0.000)
+        leaf_node = TreeNode("leaf", 0.000)
         leaf_node.room = leaf_label
         return leaf_node, depth
     else:
@@ -170,11 +164,11 @@ def decision_tree_learning(training_dataset, depth):
             # If the split value is 0, create a leaf node with the majority class
             elements, count = np.unique(training_dataset[:, -1], return_counts=True)
             majority_class = elements[np.argmax(count)]
-            leaf_node = Node("leaf", 0.000)
+            leaf_node = TreeNode("leaf", 0.000)
             leaf_node.room = majority_class
             return leaf_node, depth
 
-        tree_pointer = Node(split_emitter, split_value)
+        tree_pointer = TreeNode(split_emitter, split_value)
 
         left_dataset, right_dataset = split_dataset(training_dataset, split_emitter, split_value)
         tree_pointer.left, left_depth = decision_tree_learning(left_dataset, depth+1)
