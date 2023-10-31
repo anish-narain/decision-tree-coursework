@@ -34,25 +34,16 @@ def precision_from_confusion(confusion):
     macro_p = 0.
     if len(p) > 0:
         macro_p = np.mean(p)
-    
-    return (p, macro_p)
+    return p
 
 def recall_from_confusion(confusion):
     r = np.zeros((len(confusion), ))
     for c in range(confusion.shape[0]):
         if np.sum(confusion[c, :]) > 0:
-            r[c] = confusion[c, c] / np.sum(confusion[c, :])    
+            r[c] = confusion[c, c] / np.sum(confusion[c, :])
+    return r
 
-    # Compute the macro-averaged recall
-    macro_r = 0.
-    if len(r) > 0:
-        macro_r = np.mean(r)
-    
-    return (r, macro_r)
-
-def f1_score_from_confusion(confusion):
-    (precisions, macro_p) = precision_from_confusion(confusion)
-    (recalls, macro_r) = recall_from_confusion(confusion)
+def f1_score_from_confusion(precisions, recalls):
 
     # just to make sure they are of the same length
     assert len(precisions) == len(recalls)
@@ -61,13 +52,7 @@ def f1_score_from_confusion(confusion):
     for c, (p, r) in enumerate(zip(precisions, recalls)):
         if p + r > 0:
             f[c] = 2 * p * r / (p + r)
-
-    # Compute the macro-averaged F1
-    macro_f = 0.
-    if len(f) > 0:
-        macro_f = np.mean(f)
-    
-    return (f, macro_f)
+    return f
 
 
 #Could build off of this ===============================================================
@@ -97,63 +82,44 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
-def evaluate(test_db, trained_tree, current_node):
-    total_examples, correct_examples = 0, 0
-    for test_instance in test_db:
-        correct_examples += int(trained_tree.make_prediction(test_instance) == test_instance[-1])
-        total_examples += 1
-    accuracy = correct_examples / total_examples
-    return accuracy
+def evaluate(test_db, trained_tree):
+    predicted_values, true_values = [], []
+    for test in test_db:
+        predicted_values.append(trained_tree.make_prediction(test))
+        true_values.append(test[-1])
+    confusion = confusion_matrix(true_values, predicted_values, 4)
+    confusion_mat = confusion
+    acc = accuracy_from_confusion(confusion)
+    prec = precision_from_confusion(confusion)
+    rec = recall_from_confusion(confusion)
+    f1 = f1_score_from_confusion(prec, rec)
+
+    return acc, prec, rec, f1, confusion_mat
+
 
 def cross_validation(database, random_generator=default_rng()):
     n_folds = 10
     train_test_folds =train_test_k_fold(n_folds, len(database), random_generator)
 
-    err_sum = 0
-    acc, prec, rec, f1 = 0, 0, 0, 0
-    confusion_mat = numpy.empty((4, 4))
+    acc = 0
+    prec, rec, f1 = numpy.zeros((4, )), numpy.zeros((4,)), numpy.zeros((4,))
+    confusion_mat = numpy.zeros((4, 4))
+
     for (train_indices, test_indices) in train_test_folds:
         # get the dataset from the correct splits
         database_train = database[train_indices, :]
         database_test = database[test_indices, :]
         trained_tree, depth = decision_tree_learning(database_train, depth=0)
+        a, p, r, f, c = evaluate(database_test, trained_tree)
+        acc += a
+        prec += p
+        rec += r
+        f1 += f
+        confusion_mat += c
 
-        err_sum += evaluate(database_test, trained_tree)
+    macro_prec = prec.mean() / n_folds
+    macro_rec = rec.mean() / n_folds
+    macro_f1 = f1.mean() / n_folds
 
-        for test in database_test:
-            predicted_values, true_values = [], []
-            predicted_values.append(trained_tree.make_prediction(test))
-            true_values.append(test[-1])
-            confusion = confusion_matrix(true_values, predicted_values, 4)
-            confusion_mat += confusion
-            acc += accuracy_from_confusion(confusion)
-            prec += precision_from_confusion(confusion)[0]
-            rec += recall_from_confusion(confusion)[0]
-            f1 += f1_score_from_confusion(confusion)[0]
-
-    return acc / n_folds, prec / n_folds, rec / n_folds, f1 / n_folds, confusion_mat / n_folds, err_sum / n_folds
-  
-
-
-
-# def train_val_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
-#     # split the dataset into k splits
-#     split_indices = k_fold_split(n_folds, n_instances, random_generator)
-
-#     folds = []
-#     for k in range(n_folds):
-#         # pick k as test, and k+1 as validation (or 0 if k is the final split)
-#         test_indices = split_indices[k]
-#         #val_indices = split_indices[(k+1) % n_folds]
-
-#         # concatenate remaining splits for training
-#         train_indices = np.zeros((0, ), dtype=np.int)
-#         for i in range(n_folds):
-#             # concatenate to training set if not validation or test
-#             if i not in [k, (k+1) % n_folds]:
-#                 train_indices = np.hstack([train_indices, split_indices[i]])
-
-#         folds.append([train_indices, val_indices, test_indices])
-        
-#     return folds
+    return acc / n_folds, macro_prec, macro_rec, macro_f1, confusion_mat / n_folds
 

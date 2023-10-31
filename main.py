@@ -29,7 +29,12 @@ class Tests:
         print(f1_score_from_confusion(confusionmatrix))
 
     def test_cross_validation(dataset, rg):
-        print(cross_validation(dataset, rg))
+        acc, prec, rec, f1, confusion_mat = cross_validation(dataset, rg)
+        print("Accuracy: ", acc)
+        print("Precision: ", prec)
+        print("Recall: ", rec)
+        print("F1: ", f1)
+        print("Confusion matrix: \n", confusion_mat)
 
 
 def main():
@@ -37,9 +42,9 @@ def main():
     seed = 60012
     rg = default_rng(seed)
 
-    Tests.test_tree_plot(dataset, rg)
+    # Tests.test_tree_plot(dataset, rg)
     # Tests.test_confusion_matrix(dataset)
-    # Tests.test_cross_validation(dataset, rg)
+    Tests.test_cross_validation(dataset, rg)
 
 
 if __name__ == "__main__":

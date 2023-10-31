@@ -96,12 +96,12 @@ class TreeNode:
     def make_prediction(self, testing_instance):
         current_node = self
         while (current_node.left or current_node.right):
-            emitter_value = testing_instance[self.emitter]
-            if emitter_value < self.value:
-                current_node = self.left
+            emitter_value = testing_instance[current_node.emitter]
+            if emitter_value < current_node.value:
+                current_node = current_node.left
             else:
-                current_node = self.right
-        return self.room
+                current_node = current_node.right
+        return current_node.room
     
 def find_split(dataset):
     max_info_gain, feature, split = 0, 0, 0
