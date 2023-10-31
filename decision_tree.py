@@ -49,7 +49,8 @@ class DecisionTree:
     def __init__(self, root_emitter, root_value):
         self.root = Node(root_emitter, root_value)
     
-    def visualize_tree(self, node, level=0, prefix="Root: "):
+    def visualize_tree(self, level=0, prefix="Root: "):
+        node = self.root
         if node is not None:
             if node.left is None and node.right is None:
                 print(" " * (level * 4), prefix, "leaf:", str(node.room))
@@ -60,7 +61,8 @@ class DecisionTree:
                 self.visualize_tree(node.left, level + 1, "L--- ")
                 self.visualize_tree(node.right, level + 1, "R--- ")
 
-    def plot_tree(self, node, level=0, x=0, x_scale=1.0, y_scale=1.0):
+    def plot_tree(self, level=0, x=0, x_scale=1.0, y_scale=1.0):
+        node = self.root
         font_properties = {
             'family': 'serif',
             'color': 'black',
@@ -97,8 +99,8 @@ class DecisionTree:
         #plt.title('Decision Tree Visualization', fontsize=16, fontdict=font_properties)
         plt.show()
     
-    def make_prediction(self, node, testing_instance):
-        current_node = node
+    def make_prediction(self, testing_instance):
+        current_node = self.root
         while (current_node.left or current_node.right):
             emitter_value = testing_instance[current_node.emitter]
             if emitter_value < current_node.value:
