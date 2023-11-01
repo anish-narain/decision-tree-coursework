@@ -11,8 +11,7 @@ class Tests:
 
         print(root.visualize_tree())
         root.plot_tree()
-        # Print the final leaf node
-        print(f"Leaf Node value: {root.value}")
+        
 
     def test_confusion_matrix(dataset):
         true_dataset = []
@@ -29,12 +28,31 @@ class Tests:
         print(f1_score_from_confusion(confusionmatrix))
 
     def test_cross_validation(dataset, rg):
-        acc, prec, rec, f1, confusion_mat = cross_validation(dataset, rg)
-        print("Accuracy: ", acc)
-        print("Precision: ", prec)
-        print("Recall: ", rec)
-        print("F1: ", f1)
-        print("Confusion matrix: \n", confusion_mat)
+        acc, avg_prec, avg_rec, avg_f1, confusion_mat, prec, rec, f1 = cross_validation(dataset, rg)
+        
+
+        print(f"Accuracy: {acc:.2f}\n")
+        print("Precision for each room:")
+        for i, precision in enumerate(prec):
+            print(f"  Room {i+1}: {precision:.4f}")
+
+        print(f"Average Precision: {avg_prec:.4f}\n")
+
+        print("Recall for each room:")
+        for i, recall in enumerate(rec):
+            print(f"  Room {i+1}: {recall:.4f}")
+
+        print(f"Average Recall: {avg_rec:.4f}\n")
+
+        print("F1 Measure for each room:")
+        for i, f1_measure in enumerate(f1):
+            print(f"  Room {i+1}: {f1_measure:.4f}")
+
+        print(f"Average F1 Measure: {avg_f1:.4f}\n")
+
+        print("Confusion matrix:")
+        print(confusion_mat)
+        
 
 
 def main():
@@ -42,7 +60,7 @@ def main():
     seed = 60012
     rg = default_rng(seed)
 
-    # Tests.test_tree_plot(dataset, rg)
+    Tests.test_tree_plot(dataset, rg)
     # Tests.test_confusion_matrix(dataset)
     Tests.test_cross_validation(dataset, rg)
 

@@ -121,5 +121,5 @@ def cross_validation(database, random_generator=default_rng()):
     macro_rec = rec.mean() / n_folds
     macro_f1 = f1.mean() / n_folds
 
-    return acc / n_folds, macro_prec, macro_rec, macro_f1, confusion_mat / n_folds
+    return acc / n_folds, macro_prec, macro_rec, macro_f1, confusion_mat / n_folds, prec / n_folds, rec / n_folds, f1 / n_folds
 
