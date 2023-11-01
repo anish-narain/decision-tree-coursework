@@ -1,17 +1,20 @@
 # Machine Learning Decision Tree Coursework 1
 
 ## Summary 
-This repository shows the visualisation and evaluation of a given clean and noisy data set. The dataset presents a value of wifi strength from 7 different wifi signals which can then be used to identify which, of 4 rooms, a person is in. Using decision trees and evaluation metrics we were able to determine the efficiency of our classification and evaluation model in python. We used libraries such as, numPy and matplotlib in order to execute calculations and visualise the tree.
+This repository shows the visualisation and evaluation of a given clean and noisy data set. The dataset presents a value of wifi strength from 7 different wifi signals which can then be used to identify which, of 4 rooms, a person is in. Using decision trees and evaluation metrics we were able to determine the efficiency of our classification and evaluation model in python. We used libraries such as, NumPy and Matplotlib in order to execute calculations and visualise the tree.
 
-## Project Setup
-To set up our project environment and libraries we used the following commands, having downloaded the requirements.txt file:
+## Running the Code
+After extracting the zip file, navigate to the extracted folder in the directory.
+
+1. To view the visualisation of the decision tree from Matplotlib and a printed version in the terminal, ensure `Tests.test_tree_plot(dataset, rg)` is uncommented from `main()` in `main.py`.
+2. To view the Cross Validation classification metrics, ensure `Tests.test_cross_validation(dataset, rg)` is uncommented from `main()` in `main.py`.
+
+Modify the file name in `main()` to run the code on the required file `dataset = np.loadtxt("ENTER FILE NAME")`
+
+To run the code:
+
 ```
-$ cd your_project_directory 
-$ python3 -m venv venv
-$ source venv/bin/activate
-(venv) $ pip install --upgrade pip
-(venv) $ pip install -r requirements.txt
-(venv) $ python3 -c "import numpy as np; import torch; print(np); print(torch)"
+python3 main.py
 ```
 ## Individual Functions Explained 
 
