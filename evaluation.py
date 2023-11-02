@@ -2,16 +2,12 @@ import numpy
 
 from decision_tree import *
 
+#returns confusion matrix
 def confusion_matrix(true_values, predicted_values, num_classes):
     if len(true_values) != len(predicted_values):
         raise ValueError("Input lists must have the same length")
 
     matrix = np.zeros((num_classes, num_classes), dtype=int)
-
-    '''
-    row = true values
-    column = predicted values
-    '''
     
     for i in range(len(true_values)):
         true_class = int(true_values[i])
@@ -20,12 +16,14 @@ def confusion_matrix(true_values, predicted_values, num_classes):
 
     return matrix
 
+#returns accuracy metric from confusion matrix
 def accuracy_from_confusion(confusion):
     if np.sum(confusion) > 0:
         return np.sum(np.diag(confusion)) / np.sum(confusion)
     else:
         return 0.
 
+#returns precision metric from confusion matrix
 def precision_from_confusion(confusion):
     p = np.zeros((len(confusion), ))
     for c in range(confusion.shape[0]):
@@ -36,6 +34,7 @@ def precision_from_confusion(confusion):
         macro_p = np.mean(p)
     return p
 
+#returns recall metric from confusion matrix
 def recall_from_confusion(confusion):
     r = np.zeros((len(confusion), ))
     for c in range(confusion.shape[0]):
@@ -43,6 +42,7 @@ def recall_from_confusion(confusion):
             r[c] = confusion[c, c] / np.sum(confusion[c, :])
     return r
 
+#returns f1 metric from confusion matrix
 def f1_score_from_confusion(precisions, recalls):
 
     # just to make sure they are of the same length
@@ -55,7 +55,7 @@ def f1_score_from_confusion(precisions, recalls):
     return f
 
 
-#Could build off of this ===============================================================
+
 def k_fold_split(n_splits, n_instances, random_generator=default_rng()):
     # generate a random permutation of indices from 0 to n_instances
     shuffled_indices = random_generator.permutation(n_instances)
@@ -82,6 +82,7 @@ def train_test_k_fold(n_folds, n_instances, random_generator=default_rng()):
 
     return folds
 
+#uses testing values of database and the trained tree to return metrics 
 def evaluate(test_db, trained_tree):
     predicted_values, true_values = [], []
     for test in test_db:
@@ -96,7 +97,7 @@ def evaluate(test_db, trained_tree):
 
     return acc, prec, rec, f1, confusion_mat
 
-
+#performs cross validation on the model using 10 folds
 def cross_validation(database, random_generator=default_rng()):
     n_folds = 10
     train_test_folds =train_test_k_fold(n_folds, len(database), random_generator)
@@ -105,6 +106,7 @@ def cross_validation(database, random_generator=default_rng()):
     prec, rec, f1 = numpy.zeros((4, )), numpy.zeros((4,)), numpy.zeros((4,))
     confusion_mat = numpy.zeros((4, 4))
 
+    #trains tree and collects metrics
     for (train_indices, test_indices) in train_test_folds:
         # get the dataset from the correct splits
         database_train = database[train_indices, :]
@@ -121,5 +123,6 @@ def cross_validation(database, random_generator=default_rng()):
     macro_rec = rec.mean() / n_folds
     macro_f1 = f1.mean() / n_folds
 
+    #returns average metrics for each fold
     return acc / n_folds, macro_prec, macro_rec, macro_f1, confusion_mat / n_folds, prec / n_folds, rec / n_folds, f1 / n_folds
 

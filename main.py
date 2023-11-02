@@ -56,10 +56,15 @@ class Tests:
 
 
 def main():
-    dataset = np.loadtxt("wifi_db/clean_dataset.txt")
     seed = 60012
     rg = default_rng(seed)
-
+    
+    dataset = np.loadtxt("wifi_db/clean_dataset.txt")
+    Tests.test_tree_plot(dataset, rg)
+    # Tests.test_confusion_matrix(dataset)
+    Tests.test_cross_validation(dataset, rg)
+    
+    dataset = np.loadtxt("wifi_db/noisy_dataset.txt")
     Tests.test_tree_plot(dataset, rg)
     # Tests.test_confusion_matrix(dataset)
     Tests.test_cross_validation(dataset, rg)
